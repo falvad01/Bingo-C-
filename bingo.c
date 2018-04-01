@@ -349,12 +349,30 @@ imprimeCarton(bingoCard1,bingoCard2,row,column);
 }
 
 void imprimeCarton(int **bingoCard1,int **bingoCard2,int row, int column){
-
   int i,j;
+
+  char **bingoCardChar1;
+  char  **bingoCardChar2;
+  bingoCardChar1=(char **)malloc(row*sizeof(char *));
+  bingoCardChar2=(char **)malloc(row*sizeof(char *));
+  for(i=0;i<row;i++){
+    bingoCardChar1[i]=(char *)malloc(column*sizeof(char *));
+    bingoCardChar2[i]=(char *)malloc(column*sizeof(char *));
+  }
+
+
+  for(i=0;i<row;i++){
+    for(j=0;j<column;j++){
+        bingoCardChar1[i][j] = bingoCard1[i][j];
+      }
+    }
+
+
   printf("Carton Jugador 1\n");
   for(i=0;i<row;i++){
     for(j=0;j<column;j++){
-      printf("%d\t",bingoCard1[i][j]);
+      bingoCardChar1[row-1][column-1] = '\0';
+      printf("%c\t",bingoCardChar1);
     }
     printf("\n");
   }
