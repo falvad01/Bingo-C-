@@ -1,8 +1,9 @@
 /*POR HACER: DE MENOS A MAS PRIORIDAD
-  1-TODA LA RAMA DE JUGADOR VS jugador
-  2-ARRELGAR LA FUNCION DE IMPRIMIR
-  3-ARREGLAR LA REPETICON DE POSICIONES EN LOS HUECOS
-  4-FUNCION JUGAR(REPETICION BOLAS, COMPROBAR FILA,ACTUALIZAR CARTONES)
+1-TODA LA RAMA DE JUGADOR VS jugador
+2-ARRELGAR LA FUNCION DE IMPRIMIR
+2.1-IMPRIMIR EL CARTON INICIALDE GANADOR, PARA ELLO GUARDARLO EN OTRA VARIABLE ANTES DE EMPEZAR EL JUEGO
+3-ARREGLAR LA REPETICON DE POSICIONES EN LOS HUECOS
+4-FUNCION JUGAR(REPETICION BOLAS, COMPROBAR FILA,ACTUALIZAR CARTONES) //TERMINADO
 
 
 */
@@ -27,6 +28,10 @@ void poneNumsCarton(int **bingoCard1,int **bingoCard2,int row,int column,int bla
 int compruebaErrorMatriz(int **bingoCard1,int row,int column,int random);
 void poneBlancosCarton(int **bingoCard1, int **bingoCard2, int row, int column, int blankSpace);
 int comprobarFila(int **bingoCard1, int **bingoCard2, int row, int column);
+void compruebaCarton(int **bingoCard1, int **bingoCard2, int row, int column,int numb);
+int compruebaBola(int array[99], int numb);
+int compruebaGanador(int **bingoCard1, int **bingoCard2, int row, int column);
+int main();
 
 
 ////////////////////////////////////////////////FUNIONES GENERALES/////////////////////////////////////////
@@ -70,6 +75,10 @@ void writeLogMessage(int option,char *msg,int **bingoCard1,int row,int column){
     sprintf(initialMsg,"Juego");
     fprintf(logFile,"[%s][%s]: %s\n",stnow,initialMsg,msg);
     break;
+    case 3:
+    sprintf(initialMsg,"Ganador");
+    fprintf(logFile,"[%s][%s]: %s\n",stnow,initialMsg,msg);
+
   }
   fclose(logFile); //Cerramos el fichero despues de cada escritura para que se imprima en orden
 }
@@ -254,65 +263,147 @@ void imprimeCarton(int **bingoCard1,int **bingoCard2,int row, int column){
   }
 
 
-  writeLogMessage(1,"Carton para la partida del jugador 1 ordenado y con huecos",bingoCard1,row,column);//Mandamos a imprimir la matriz del j1
-  writeLogMessage(1,"Carton para la partida del jugador 2 ordenado y con huecos",bingoCard2,row,column);//Mandamos a imprimir la matriz del j2
+  writeLogMessage(1,"Carton jugador 1",bingoCard1,row,column);//Mandamos a imprimir la matriz del j1
+  writeLogMessage(1,"Carton jugador 2",bingoCard2,row,column);//Mandamos a imprimir la matriz del j2
 
 }
 
 void jugar(int **bingoCard1, int **bingoCard2, int row, int column){
 
-int balls[99];//array donde guardamos las volas que van saliendo
-int aleat;
-char msg[100];
-int rowFlag=0;//Inicializamos el flag de comprobar fila, una vez que un jugador cante fila, el valor cambaira y no se volvera a comprobar fila
-int backRow;
-printf("El juego esta listo para empezar\n");
-writeLogMessage(2,"Juego listo para emepzar, que lo disfrute",NULL,0,0);
-
-
-int i;
-for(i=0;i<99;i++){ //Bucle que genera como maxumo 99 iteraciones o hasta que se declare algun ganador del juego
+  int balls[99];//array donde guardamos las volas que van saliendo
+  int aleat;
+  char msg[100];
+  int rowFlag = 0;//Inicializamos el flag de comprobar fila, una vez que un jugador cante fila, el valor cambaira y no se volvera a comprobar fila
+  int backRow;
+  int backBingo;
+  int bingoFlag = 0;
+  printf("El juego esta listo para empezar\n");
+  writeLogMessage(2,"Juego listo para emepzar, que lo disfrute",NULL,0,0);
   imprimeCarton(bingoCard1,bingoCard2,row,column);//Imprimimos el carton
 
-  sleep(10);
+  int i;
+  for(i=0;i<99;i++){ //Bucle que genera como maxumo 99 iteraciones o hasta que se declare algun ganador del juego
+    aleat = calculaAleatorios(1,99);//Calculamos el aleatorio de las bolas;
+    //sleep(10);
 
-  balls[i] = calculaAleatorios(1,99);//Calculamos el aleatorio de las bolas;
+    while(compruebaBola(balls,aleat)==-2){//Si nos retorna -2 es que la hay un numero repetido en el array de las bolas
+      aleat=calculaAleatorios(1,99);//Recalculamos el aleatorio, solosaldra del bucle cunado el numero no se repita
+    }
+    balls[i] = aleat;
+    printf("La bola que ha salido es la numero: %d\t\n",balls[i]); //Ddecimo que bola ha salido y en que iteracion
+    sprintf(msg,"Ha salido el numero %d en la iteracion %d", balls[i],i);
+    writeLogMessage(2,msg,0,0,0);
 
-  printf("La bola que ha salido es la numero: %d\t\n",balls[i]); //Ddecimo que bola ha salido y en que iteracion
-  sprintf(msg,"Ha salido el numero %d en la iteracion %d", balls[i],i);
-  writeLogMessage(2,msg,0,0,0);
+    printf("Los cartones quedan asi : \n");
 
-  printf("Los cartones quedan asi : \n");
+    compruebaCarton(bingoCard1,bingoCard2,row,column,aleat);//Lamamos a la fucnion que comprueba si el numero esta en el carton o no, y luego lo imprime
+    //Comprobamos fila
+    if(rowFlag == 0){
+      backRow = comprobarFila(bingoCard1,bingoCard2,row,column);
+      if(backRow == 1){
+        printf("El jugador 1 ha cantado fila en la iteracion %d\n",i);
+        writeLogMessage(2,"El jugador 1 ha cantado fila",0,0,0);
+        rowFlag = 1;//cambiampos el flag de comprobar fila para que no se vuelva a comprobar
+      }else if(backRow == 2){
+        printf("EL jugador 2 ha cantado fila en la iteracion %d\n",i);
+        writeLogMessage(2,"El jugador 2 ha cantado fila",0,0,0);
+        rowFlag = 1;//cambiampos el flag de comprobar fila para que no se vuelva a comprobar
+      }else{
+        printf("Nadie ha cantado fila\n");
+      }
+    }
+    //Comprobamos bingo
+    if(bingoFlag == 0){
+      backBingo = compruebaGanador(bingoCard1,bingoCard2,row,column);
+      if(backBingo == 1){
+        printf("GANA EL JUGADOR 1, ENHORABUENA\n");
+        writeLogMessage(3,"Gana el jugador 1",0,0,0);
+        bingoFlag = 1;
+      }else if( backBingo == 2){
+        printf("GANA EL JUGADOR 2, ENHORABUENA\n");
+        writeLogMessage(3,"Gana el jugador 2",0,0,0);
+        bingoFlag = 1;
+      }else{
+        printf("Sin ganador por el momento\n");
+      }
+    }
+    if(bingoFlag == 1){
+      printf("JUEGO TERMINADO, SERA LLEVADO AL MENU PRINCIPAL\n");
+      writeLogMessage(2,"JUEGO TERMINADO",0,0,0);
+      i=200; //Terminamos el bucle manualemte y retornamos al menu
+      int z;
+      for(z=0;z<3;z++){
+        printf("Saliendo\n");
+        sleep(1);
+      }
+    }
+  }  //Repetimos
+}
 
-  //Comprobamos fila
-  if(rowFlag == 0){
-    backRow = comprobarFila(bingoCard1,bingoCard2,row,column);
-    if(backRow == 1){
-      printf("El jugador 1 ha cantado fila en la iteracion %d\n",i);
-      writeLogMessage(2,"El jugador 1 ha cantado fila",0,0,0);
-      rowFlag = 1;//cambiampos el flag de comprobar fila para que no se vuelva a comprobar
-    }else if(backRow == 2){
-      printf("EL jugador 2 ha cantado fila en la iteracion %d\n",i);
-      writeLogMessage(2,"El jugador 2 ha cantado fila",0,0,0);
-      rowFlag = 1;//cambiampos el flag de comprobar fila para que no se vuelva a comprobar
-    }else{
-      printf("Nadie ha cantado fila\n");
+////////////////////////////////////////////////7
+
+int compruebaBola(int array[99], int numb){
+
+  int i;
+  for(i=0;i<99;i++){
+    if(numb == array[i]){
+      return -2;//Valor para cuando se repite un valor del vector
     }
   }
-  //Comprobamos bingo
-
-
-
-}  //Repetimos
-
-
+  return 0; //Valor para cuando no se repite un valor del vector
 }
+
+///////////////////////////////////////////////////
+
+void compruebaCarton(int **bingoCard1, int **bingoCard2, int row, int column,int numb){ //COmprobar cuadno hay un numero en el carton
+
+  int i,j;
+
+  for(i=0;i<row;i++){
+    for(j=0;j<column;j++){
+      if(bingoCard1[i][j] == numb){//Carton 1
+        bingoCard1[i][j] = -2;
+      }
+      if(bingoCard2[i][j] == numb){//Carton 2
+        bingoCard2[i][j] = -2;
+      }
+    }
+  }
+  imprimeCarton(bingoCard1,bingoCard2,row,column);//Imprimimos el carton
+}
+
+/////////////////////////////////////////////////////////////////
 
 int comprobarFila(int **bingoCard1, int **bingoCard2, int row, int column){ //Devulve 1 si hay fila en jugador 1, 2 si hay fila en jugador 2 y 0 si no hay fila en esta jugada
 
 
-return 1;
+  return 0;
 }
+
+int compruebaGanador(int **bingoCard1, int **bingoCard2, int row, int column){
+
+  int p1accountant = 0;
+  int p2accountant = 0;
+  int i,j;
+  for(i=0;i<row;i++){
+    for(j=0;j<column;j++){
+      if(bingoCard1[i][j] < 0 ){
+        p1accountant++;
+        if(p1accountant == row*column){
+          return 1; //Ha ganado el jugador 1
+        }
+      }
+      if(bingoCard2[i][j] < 0){
+        p2accountant++;
+        if(p2accountant == row*column){
+          return 2; //Ha ganado el jugador 2
+        }
+      }
+    }
+  }
+  return 0;//No ha habido ganador
+}
+
 /////////////////////////////////////////////////////RAMA MAQUINA VS MAQUINA//////////////////////////////////////////////////////
 
 void jugarOrdenador(int row, int column, int blankSpace){//Reservamos espacio para la matriz que sera nuestro carton de juego
@@ -342,16 +433,16 @@ void tableroAutomatico(int **bingoCard1,int **bingoCard2,int row,int column,int 
   }
   /*DEBUG
   for(i=0;i<row;i++){
-    for(j=0;j<column;j++){
-      printf("%d\t",bingoCard1[i][j]);
-      printf("%d\t",bingoCard2[i][j]);
-    }
-    printf("\n");
-  }
-  writeLogMessage(1,"Carton para la partida j1 a 0",bingoCard1,row,column);//Mandamos a imprimir la matriz
-  writeLogMessage(1,"Carton para la partida j2 a 1",bingoCard2,row,column);//Mandamos a imprimir la matriz
-  //*/
-  poneNumsCarton(bingoCard1,bingoCard2,row,column,blankSpace);
+  for(j=0;j<column;j++){
+  printf("%d\t",bingoCard1[i][j]);
+  printf("%d\t",bingoCard2[i][j]);
+}
+printf("\n");
+}
+writeLogMessage(1,"Carton para la partida j1 a 0",bingoCard1,row,column);//Mandamos a imprimir la matriz
+writeLogMessage(1,"Carton para la partida j2 a 1",bingoCard2,row,column);//Mandamos a imprimir la matriz
+//*/
+poneNumsCarton(bingoCard1,bingoCard2,row,column,blankSpace);
 }
 ////////////////////////////
 
@@ -478,6 +569,7 @@ int main(){
     menu=mainMenu();//Llamamos al menu
     if(menu==3){//Si se recibe un 3, cerramos el programa
       printf("GRACIAS POR JUGAR, QUE TENGA UN BUEN DIA\n");
+
       exit(-1);
     }
     juegoBingo(menu);//Llamamos a la funcion juegoBingo
