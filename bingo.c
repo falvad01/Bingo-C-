@@ -37,17 +37,19 @@ int main();
 ////////////////////////////////////////////////FUNIONES GENERALES/////////////////////////////////////////
 void writeLogMessage(int option,char *msg,int **bingoCard1,int row,int column){
   char initialMsg[15];
+  int i,j;
   time_t now = time(0);
   struct tm *tlocal = localtime(&now);//calculamos la hora actual
   char stnow[24];
   strftime(stnow, 24, "%d/%m/%y %H:%M:%S", tlocal);
   char fuenteLog[15];
   logFile = fopen("logBingo.txt","a");
-  if(logFile==NULL){//Mandamos un mensaje de error si el archivo no se puede abrir
+  if(logFile == NULL){//Mandamos un mensaje de error si el archivo no se puede abrir
     perror("NO se puede abrir el archivo");
   }
 
   switch(option){
+
     case 0://Instrucines mandadas por teclado
     sprintf(initialMsg,"Teclado");//Imprimimos con la etiqueta teclado
     fprintf(logFile,"[%s][%s]: %s\n",stnow,initialMsg,msg);
@@ -59,26 +61,28 @@ void writeLogMessage(int option,char *msg,int **bingoCard1,int row,int column){
     //Lineas que imprimen la matriz en el log
     char line[80];
     sprintf(line, "%d %d\n", row, column);
-    for (int i = 0; i < row; i++) {
+    for(i=0;i<row;i++){
       line[0] = '\0';
-      for (int j = 0; j < column; j++) {
+      for(j=0;j<column;j++){
         char buffer[10];
-        sprintf(buffer, "%d ", bingoCard1[i][j]);
-        strcat(line, buffer);
+        sprintf(buffer,"%d ",bingoCard1[i][j]);
+        strcat(line,buffer);
       }
       int len = strlen(line);
       line[len - 1] = '\n';
       fputs(line, logFile);
     }
     break;
+
     case 2:
     sprintf(initialMsg,"Juego");
     fprintf(logFile,"[%s][%s]: %s\n",stnow,initialMsg,msg);
     break;
+
     case 3:
     sprintf(initialMsg,"Ganador");
     fprintf(logFile,"[%s][%s]: %s\n",stnow,initialMsg,msg);
-
+    break;
   }
   fclose(logFile); //Cerramos el fichero despues de cada escritura para que se imprima en orden
 }
@@ -104,9 +108,9 @@ int mainMenu(){//Funcion que me imprime un menu por pantalla y e devuelve la opc
     printf("3-Salir\n");
     scanf("%d",&menu );
   }
-  if(menu==1){//Imprimimos la seleccion del menu en el log
+  if(menu == 1){//Imprimimos la seleccion del menu en el log
     sprintf(msgMenu,"El juego se ejecutara en modo maquina vs maquina");
-  }else if(menu==2){
+  }else if(menu == 2){
     sprintf(msgMenu,"El juego se ejecutara en modo jugador vs jugador");
   }else{
     sprintf(msgMenu,"Saliendo del juego, que tenga una buena tarde");
@@ -117,14 +121,14 @@ int mainMenu(){//Funcion que me imprime un menu por pantalla y e devuelve la opc
 ////////////////////////////////////////////////
 
 void juegoBingo(int menu){
-  int row=0,column=0;
+  int row = 0,column = 0;
   int blankSpace;
   char msgVariables[100];
   //INtroducimos el tamaño que van a tener nuestros cartones
   printf("Introduzca el tamaño del carton, el maximo de numeros es 99\n");
   printf("FILAS:\t"); scanf("%d",&row);
   printf("COLUMNAS:\t"); scanf("%d",&column);
-  while((row*column)>99){//Control de errores
+  while((row*column) > 99){//Control de errores
     printf("ERROR, HAY MAS HUECOS QUE NUMEROS\n");
     printf("Introduzca el tamaño del carton, el maximo de numeros es 99\n");
     printf("FILAS:\t"); scanf("%d",&row);
@@ -133,7 +137,7 @@ void juegoBingo(int menu){
   //Introducimos el numero de huecos blancos que hay en cada fila
   printf("Ahora selecione el numero de hueco que quiere que haya en cada fila\n");
   scanf("%d",&blankSpace);
-  while(blankSpace>=column || blankSpace<=0){//COntrol de errores
+  while(blankSpace >= column || blankSpace <= 0){//COntrol de errores
     printf("ERROR, LOS ESPACIOS EN BLANCO DEBEN ESTAR ENTRE 1 Y %d\n",column-1);
     printf("Ahora selecione el numero de hueco que quiere que haya en cada fila\n");
     scanf("%d",&blankSpace);
@@ -156,7 +160,7 @@ int compruebaErrorMatriz(int **bingoCard,int row,int column, int random){//COmpr
   int i,j;
   for(i=0;i<row;i++){
     for(j=0;j<column;j++){
-      if(random==bingoCard[i][j]){
+      if(random == bingoCard[i][j]){
         return -2;//Valor para cuando se repite un valor en la matriz
       }
     }
@@ -167,11 +171,11 @@ int compruebaErrorMatriz(int **bingoCard,int row,int column, int random){//COmpr
 int ordenaVector(int **bingoCard, int row, int column){//Ordenamos la matriz  a un vector de tamaño row*column
 
 
-  int tam=row*column;;
+  int tam = row*column;;
   int *arrayAux;
-  arrayAux=(int *)malloc(tam*sizeof(int));
+  arrayAux = (int *)malloc(tam*sizeof(int));
   int aux;//ausialiar del metodo de la burbuja
-  int m=0,n=0;//auxialiares para pasar de matriz a vector y viceversa
+  int m = 0,n = 0;//auxialiares para pasar de matriz a vector y viceversa
 
   int i,j,k,l;
   for(i=0;i<column;i++){//recorremos la matriz por columnas pora ordenarlas por columnas
@@ -221,22 +225,23 @@ return 0;
 }
 */
 void imprimeCarton(int **bingoCard1,int **bingoCard2,int row, int column){
-  int i,j;
 
-  char **bingoCardChar1;//Reservamos memeoria para el caron de caracteres
-  char  **bingoCardChar2;
-  bingoCardChar1=(char **)malloc(row*sizeof(int *));
-  bingoCardChar2=(char **)malloc(row*sizeof(int *));
+  int i,j;
+  char **bingoCardChar1;//Reservamos memeoria para el carton de caracteres
+  char **bingoCardChar2;
+
+  bingoCardChar1 = (char **)malloc(row*sizeof(int *));
+  bingoCardChar2 = (char **)malloc(row*sizeof(int *));
   for(i=0;i<row;i++){
-    bingoCardChar1[i]=(char *)malloc(column*sizeof(int *));
-    bingoCardChar2[i]=(char *)malloc(column*sizeof(int *));
+    bingoCardChar1[i] = (char *)malloc(column*sizeof(int *));
+    bingoCardChar2[i] = (char *)malloc(column*sizeof(int *));
   }
 
 
   for(i=0;i<row;i++){
     for(j=0;j<column;j++){
       bingoCardChar1[i][j] = bingoCard1[i][j];//Pasamos la matriz de enteros a carecteres
-      bingoCardChar2[i][j] = bingoCard1[i][j];
+      bingoCardChar2[i][j] = bingoCard2[i][j];
     }
   }
 
@@ -244,14 +249,13 @@ void imprimeCarton(int **bingoCard1,int **bingoCard2,int row, int column){
   printf("Carton Jugador 1\n");//Imprimimos carton 1
   for(i=0;i<row;i++){
     for(j=0;j<column;j++){
-      if(bingoCardChar1[i][j] == -1){
-        bingoCardChar1[i][j] = 'X';
+      if(bingoCard1[i][j] == -1){
+        bingoCard1[i][j] = 'X';
       }
       printf("%d\t",bingoCard1[i][j]);
     }
     printf("\n");
   }
-
   printf("\n");
 
   printf("Carton Jugador 2\n"); //Imprimimos carton 2
@@ -282,7 +286,7 @@ void jugar(int **bingoCard1, int **bingoCard2, int row, int column){
   imprimeCarton(bingoCard1,bingoCard2,row,column);//Imprimimos el carton
 
   int i;
-  for(i=0;i<99;i++){ //Bucle que genera como maxumo 99 iteraciones o hasta que se declare algun ganador del juego
+  for(i=0;i<2;i++){ //Bucle que genera como maxumo 99 iteraciones o hasta que se declare algun ganador del juego
     aleat = calculaAleatorios(1,99);//Calculamos el aleatorio de las bolas;
     //sleep(10);
 
@@ -342,7 +346,7 @@ void jugar(int **bingoCard1, int **bingoCard2, int row, int column){
 
 ////////////////////////////////////////////////7
 
-int compruebaBola(int array[99], int numb){
+int compruebaBola(int array[99], int numb){ //Hacemos que no salga la misma bola dos veces
 
   int i;
   for(i=0;i<99;i++){
@@ -409,8 +413,8 @@ int compruebaGanador(int **bingoCard1, int **bingoCard2, int row, int column){
 void jugarOrdenador(int row, int column, int blankSpace){//Reservamos espacio para la matriz que sera nuestro carton de juego
   int **bingoCard1;
   int  **bingoCard2;
-  bingoCard1=(int **)malloc(row*sizeof(int *));
-  bingoCard2=(int **)malloc(row*sizeof(int *));
+  bingoCard1 = (int **)malloc(row*sizeof(int *));
+  bingoCard2 = (int **)malloc(row*sizeof(int *));
   int i;
   for(i=0;i<row;i++){
     bingoCard1[i]=(int *)malloc(column*sizeof(int *));
@@ -454,17 +458,17 @@ void poneNumsCarton(int **bingoCard1,int **bingoCard2,int row,int column,int bla
   for(i=0;i<row;i++){
     for(j=0;j<column;j++){
 
-      random=calculaAleatorios(1,99);//Calculamos un aleatorio entre 1 y el numero maximo de numeros que es 99
-      random2=calculaAleatorios(1,99);
+      random = calculaAleatorios(1,99);//Calculamos un aleatorio entre 1 y el numero maximo de numeros que es 99
+      random2 = calculaAleatorios(1,99);
 
       while(compruebaErrorMatriz(bingoCard1,row,column,random)==-2){//Si nos retorna -2 es que la hay un numero repetido en la funcion(carton1)
-        random=calculaAleatorios(1,99);//Recalculamos el aleatorio, solosaldra del bucle cunado el numero no se repita
+        random = calculaAleatorios(1,99);//Recalculamos el aleatorio, solosaldra del bucle cunado el numero no se repita
       }
       while(compruebaErrorMatriz(bingoCard2,row,column,random2)==-2){//Si nos retorna -2 es que la hay un numero repetido en la funcion(carton2)
-        random2=calculaAleatorios(1,99);//Recalculamos el aleatorio, solosaldra del bucle cunado el numero no se repita
+        random2 = calculaAleatorios(1,99);//Recalculamos el aleatorio, solosaldra del bucle cunado el numero no se repita
       }
-      bingoCard1[i][j]=random;//Metemos el aleatorio dentro de la matriz j1
-      bingoCard2[i][j]=random2;//Metemos el aleatorio dentro de la matriz j2
+      bingoCard1[i][j] = random;//Metemos el aleatorio dentro de la matriz j1
+      bingoCard2[i][j] = random2;//Metemos el aleatorio dentro de la matriz j2
     }
     printf("\n");
   }
@@ -478,8 +482,8 @@ printf("\n");
 }
 */
 
-**bingoCard1=ordenaVector(bingoCard1,row,column);//llamamos a la funcion que nos ordenara la matriz
-**bingoCard2=ordenaVector(bingoCard2,row,column);
+**bingoCard1 = ordenaVector(bingoCard1,row,column);//llamamos a la funcion que nos ordenara la matriz
+**bingoCard2 = ordenaVector(bingoCard2,row,column);
 /*DEBUG
 writeLogMessage(1,"Carton para la partida del jugador 1 ordenado",bingoCard1,row,column);//Mandamos a imprimir la matriz del j1
 writeLogMessage(1,"Carton para la partida del jugador 2 ordenado",bingoCard2,row,column);//Mandamos a imprimir la matriz del j2
@@ -495,11 +499,11 @@ void poneBlancosCarton(int **bingoCard1, int **bingoCard2, int row, int column, 
   int i,j,k,l,m,n,o,p;
   //Reservamos espacio de memoria para las matrices auxiliares que guardan las posiciones de los blancos
 
-  blankPoss1=(int **)malloc(row*sizeof(int *));
-  blankPoss2=(int **)malloc(row*sizeof(int *));
+  blankPoss1 = (int **)malloc(row*sizeof(int *));
+  blankPoss2 = (int **)malloc(row*sizeof(int *));
   for(p=0;p<row;p++){
-    blankPoss1[p]=(int *)malloc(column*sizeof(int *));
-    blankPoss2[p]=(int *)malloc(column*sizeof(int *));
+    blankPoss1[p] = (int *)malloc(column*sizeof(int *));
+    blankPoss2[p] = (int *)malloc(column*sizeof(int *));
   }
 
   for(l=0;l<row;l++){
@@ -509,8 +513,8 @@ void poneBlancosCarton(int **bingoCard1, int **bingoCard2, int row, int column, 
       aux[l][k]=calculaAleatorios(0,column);
     }
     */
-    blankPoss1[l][k]=calculaAleatorios(0,column-1);
-    blankPoss2[l][k]=calculaAleatorios(0,column-1);
+    blankPoss1[l][k] = calculaAleatorios(0,column-1);
+    blankPoss2[l][k] = calculaAleatorios(0,column-1);
   }
 }
 
@@ -533,8 +537,8 @@ printf("\n");
 //*/
 for(i=0;i<row;i++){//Metemos la posicion en blanco en el carton como un -1
   for(k=0;k<blankSpace;k++){
-    bingoCard1[i][blankPoss1[i][k]]=-1;
-    bingoCard2[i][blankPoss2[i][k]]=-1;
+    bingoCard1[i][blankPoss1[i][k]] = -1;
+    bingoCard2[i][blankPoss2[i][k]] = -1;
   }
 }
 
@@ -563,16 +567,16 @@ int main(){
   remove("logBingo.txt");//Borramos el aterior archivo de log
   //Declaracion de variables
   int menu;
-  int infinite=-1;//Variable del bucle infinito
+  int infinite = -1;//Variable del bucle infinito
 
   do{//bucle infinito
-    menu=mainMenu();//Llamamos al menu
-    if(menu==3){//Si se recibe un 3, cerramos el programa
+    menu = mainMenu();//Llamamos al menu
+    if(menu == 3){//Si se recibe un 3, cerramos el programa
       printf("GRACIAS POR JUGAR, QUE TENGA UN BUEN DIA\n");
 
       exit(-1);
     }
     juegoBingo(menu);//Llamamos a la funcion juegoBingo
 
-  }while(infinite=-1);//bucle infinito
+  }while(infinite = -1);//bucle infinito
 }
